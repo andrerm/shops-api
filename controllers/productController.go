@@ -35,13 +35,16 @@ func GetProducts(c *gin.Context) {
 	var products []models.Product
 	pagination := c.MustGet("pagination").(middleware.Pagination)
 
+	var total int64
+	config.DB.Model(&models.Product{}).Count(&total)
+
 	offset := (pagination.Page - 1) * pagination.Limit
 	config.DB.Offset(offset).Limit(pagination.Limit).Find(&products)
 
 	utils.RespondSuccess(c, products, gin.H{
 		"page":  pagination.Page,
 		"limit": pagination.Limit,
-		"total": len(products), // ideally, you should use a count query to get the total number of records
+		"total": total,
 	})
 }
 

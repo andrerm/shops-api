@@ -5,7 +5,10 @@ import (
 	"ShopsAPI/middleware"
 	"ShopsAPI/models"
 	"ShopsAPI/utils"
+	"log"
 	"net/http"
+
+	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -43,7 +46,11 @@ func GetUsers(c *gin.Context) {
 
 // CreateUser creates a new user
 func CreateUser(c *gin.Context) {
-	var input models.User
+	var input struct {
+		Name     string `json:"name" binding:"required"`
+		Email    string `json:"email" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		utils.RespondError(c, http.StatusBadRequest, "Invalid request data", err.Error())
 		return
@@ -57,11 +64,20 @@ func CreateUser(c *gin.Context) {
 	}
 
 	user := models.User{
+		UserID:   uuid.New(), // Generate new UUID for UserID
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: hashedPassword,
 	}
-	config.DB.Create(&user)
+
+	// Log the user struct
+	log.Println("Creating user:", user)
+
+	if err := config.DB.Create(&user).Error; err != nil {
+		log.Println("Error creating user:", err)
+		utils.RespondError(c, http.StatusInternalServerError, "Failed to create user", err.Error())
+		return
+	}
 	utils.RespondSuccess(c, user, nil)
 }
 
