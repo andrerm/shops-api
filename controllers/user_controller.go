@@ -5,7 +5,6 @@ import (
 	"ShopsAPI/middleware"
 	"ShopsAPI/models"
 	"ShopsAPI/utils"
-	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -44,40 +43,92 @@ func GetUsers(c *gin.Context) {
 	})
 }
 
-// CreateUser creates a new user
+// // CreateUser creates a new user
+// func CreateUser(c *gin.Context) {
+// 	var input struct {
+// 		Name     string `json:"name" binding:"required"`
+// 		Email    string `json:"email" binding:"required"`
+// 		Password string `json:"password" binding:"required"`
+// 	}
+// 	if err := c.ShouldBindJSON(&input); err != nil {
+// 		utils.RespondError(c, http.StatusBadRequest, "Invalid request data", err.Error())
+// 		return
+// 	}
+
+// 	// Hash the password
+// 	hashedPassword, err := HashPassword(input.Password)
+// 	if err != nil {
+// 		utils.RespondError(c, http.StatusInternalServerError, "Failed to hash password", err.Error())
+// 		return
+// 	}
+
+// 	user := models.User{
+// 		UserID:   uuid.New(), // Generate new UUID for UserID
+// 		Name:     input.Name,
+// 		Email:    input.Email,
+// 		Password: hashedPassword,
+// 	}
+
+// 	// Log the user struct
+// 	log.Println("Creating user:", user)
+
+// 	if err := config.DB.Create(&user).Error; err != nil {
+// 		log.Println("Error creating user:", err)
+// 		utils.RespondError(c, http.StatusInternalServerError, "Failed to create user", err.Error())
+// 		return
+// 	}
+// 	utils.RespondSuccess(c, user, nil)
+// }
+
 func CreateUser(c *gin.Context) {
 	var input struct {
 		Name     string `json:"name" binding:"required"`
 		Email    string `json:"email" binding:"required"`
 		Password string `json:"password" binding:"required"`
+		RoleName string `json:"role_name" binding:"required"`
+		StoreID  string `json:"store_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		utils.RespondError(c, http.StatusBadRequest, "Invalid request data", err.Error())
 		return
 	}
 
-	// Hash the password
-	hashedPassword, err := HashPassword(input.Password)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
 		utils.RespondError(c, http.StatusInternalServerError, "Failed to hash password", err.Error())
 		return
 	}
 
 	user := models.User{
-		UserID:   uuid.New(), // Generate new UUID for UserID
+		UserID:   uuid.New(),
 		Name:     input.Name,
 		Email:    input.Email,
-		Password: hashedPassword,
+		Password: string(hashedPassword),
 	}
 
-	// Log the user struct
-	log.Println("Creating user:", user)
-
 	if err := config.DB.Create(&user).Error; err != nil {
-		log.Println("Error creating user:", err)
 		utils.RespondError(c, http.StatusInternalServerError, "Failed to create user", err.Error())
 		return
 	}
+
+	var role models.Role
+	if err := config.DB.Where("role_name = ?", input.RoleName).First(&role).Error; err != nil {
+		utils.RespondError(c, http.StatusInternalServerError, "Failed to find role", err.Error())
+		return
+	}
+
+	userRole := models.UserRole{
+		UserRoleID: uuid.New(),
+		UserID:     user.UserID,
+		RoleID:     role.RoleID,
+		StoreID:    uuid.MustParse(input.StoreID),
+	}
+
+	if err := config.DB.Create(&userRole).Error; err != nil {
+		utils.RespondError(c, http.StatusInternalServerError, "Failed to assign role to user", err.Error())
+		return
+	}
+
 	utils.RespondSuccess(c, user, nil)
 }
 
