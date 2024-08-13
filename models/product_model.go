@@ -7,9 +7,14 @@ type Product struct {
 	Name      string    `gorm:"type:varchar(100);not null"`
 	Price     float64   `gorm:"type:numeric;not null"`
 	Stock     int       `gorm:"type:int;not null"`
+	Category  string    `gorm:"type:varchar(50)"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	CreatedBy string    `gorm:"type:uuid"`
 	UpdatedBy string    `gorm:"type:uuid"`
-	StoreID   string    `gorm:"type:uuid;not null"`
+	StoreID   string    `gorm:"type:uuid"`
+}
+
+func (Product) TableName() string {
+	return "products"
 }

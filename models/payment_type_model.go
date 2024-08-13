@@ -10,3 +10,7 @@ type PaymentType struct {
 	CreatedBy     string    `gorm:"type:uuid"`
 	UpdatedBy     string    `gorm:"type:uuid"`
 }
+
+func (PaymentType) TableName() string {
+	return "payment_types"
+}

@@ -16,3 +16,7 @@ type User struct {
 	CreatedBy uuid.UUID `gorm:"type:uuid"`
 	UpdatedBy uuid.UUID `gorm:"type:uuid"`
 }
+
+func (User) TableName() string {
+	return "users"
+}
