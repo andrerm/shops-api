@@ -4,7 +4,6 @@ import (
 	"ShopsAPI/config"
 	"ShopsAPI/middleware"
 	"ShopsAPI/models"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -44,15 +43,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	log.Println("User ID:", user.UserID)
-	log.Println("User Role Query:", userRole)
-	log.Println("Fetched Role:", userRole.Role.RoleName)
-
-	var role models.Role
-	if err := config.DB.Where("role_id = ?", userRole.RoleID).First(&role).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Role"})
-		return
-	}
 	// Generate JWT token with role included
 	// token, err := middleware.GenerateToken(user.Email, role.RoleName, credentials.AppType)
 	token, err := middleware.GenerateToken(user.Email, userRole.Role.RoleName, credentials.AppType)

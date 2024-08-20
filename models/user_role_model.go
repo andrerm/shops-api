@@ -17,7 +17,7 @@ type UserRole struct {
 	UpdatedBy  uuid.UUID `gorm:"type:uuid"`
 
 	User User `gorm:"foreignKey:UserID"`
-	Role Role `gorm:"foreignKey:RoleID"`
+	Role Role `gorm:"foreignKey:RoleID;references:RoleID"`
 }
 
 func (UserRole) TableName() string {
