@@ -20,6 +20,12 @@ type Transaction struct {
 	UpdatedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	CreatedBy     uuid.UUID `gorm:"type:uuid"`
 	UpdatedBy     uuid.UUID `gorm:"type:uuid"`
+
+	// Relationships
+	User        User        `gorm:"foreignKey:UserID;references:UserID"`
+	Store       Store       `gorm:"foreignKey:StoreID;references:StoreID"`
+	Product     Product     `gorm:"foreignKey:ProductID;references:ProductID"`
+	PaymentType PaymentType `gorm:"foreignKey:PaymentTypeID;references:PaymentTypeID"`
 }
 
 func (Transaction) TableName() string {

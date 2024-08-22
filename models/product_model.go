@@ -17,6 +17,9 @@ type Product struct {
 	CreatedBy uuid.UUID `gorm:"type:uuid"`
 	UpdatedBy uuid.UUID `gorm:"type:uuid"`
 	StoreID   uuid.UUID `gorm:"type:uuid"`
+
+	// BelongsTo relationship with Store
+	Store Store `gorm:"foreignKey:StoreID;references:StoreID"`
 }
 
 func (Product) TableName() string {

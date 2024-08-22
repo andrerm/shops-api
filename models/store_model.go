@@ -14,6 +14,9 @@ type Store struct {
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	CreatedBy uuid.UUID `gorm:"type:uuid"`
 	UpdatedBy uuid.UUID `gorm:"type:uuid"`
+
+	// HasMany relationship with Product
+	Products []Product `gorm:"foreignKey:StoreID"`
 }
 
 func (Store) TableName() string {
